@@ -35,7 +35,32 @@ class NetworkApiServices extends BaseApiServices {
     return responseJson ;
 
   }
+  Future<dynamic> postMultipartApi(String url, Map<String, String> fields, File file) async {
+    if (kDebugMode) {
+      print(url);
+      print(fields);
+    }
 
+    dynamic responseJson;
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.fields.addAll(fields);
+      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      responseJson = returnResponse(response);
+    } on SocketException {
+      throw InternetException('');
+    } on RequestTimeOut {
+      throw RequestTimeOut('');
+    }
+    if (kDebugMode) {
+      print(responseJson);
+    }
+    return responseJson;
+  }
 
   @override
   Future<dynamic> postApi(var data , String url)async{
